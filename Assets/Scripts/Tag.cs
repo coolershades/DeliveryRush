@@ -5,5 +5,6 @@
     public static class Tag
     {
         public const string PigeonFlock = "PigeonFlock";
+        public const string FrozenPuddle = "FrozenPuddle";
     }
 }

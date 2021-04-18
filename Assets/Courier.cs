@@ -6,7 +6,8 @@ public class Courier : MonoBehaviour
 {
     private CourierState _state;
     private float _parcelDamageStatus;
-    public float ParcelDamageStatus
+
+    private float ParcelDamageStatus
     {
         get => _parcelDamageStatus;
         set
@@ -21,14 +22,17 @@ public class Courier : MonoBehaviour
     private Collider2D _collider;
     private Animator _animator;
 
-    [SerializeField] private float _speed;
-    [SerializeField] private float _jumpForce;
-    [SerializeField] private LayerMask _groundLayer;
+    [SerializeField] private float speed;
+    [SerializeField] private float jumpForce;
+    [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private LayerMask groundObjectsLayer;
     
+    private static readonly int State = Animator.StringToHash("State");
+
     void Start()
     {
-        _speed = 7;
-        _jumpForce = 10;
+        speed = 7;
+        jumpForce = 10;
         ParcelDamageStatus = 0;
         
         _rigidBody = GetComponent<Rigidbody2D>();
@@ -49,12 +53,18 @@ public class Courier : MonoBehaviour
 
         if (hDirection != 0)
         {
-            _rigidBody.velocity = new Vector2(direction * _speed, _rigidBody.velocity.y);
+            _rigidBody.velocity = new Vector2(direction * speed, _rigidBody.velocity.y);
             transform.localScale = new Vector2(direction, 1);
         }
 
-        if (Input.GetButtonDown("Jump") && _collider.IsTouchingLayers(_groundLayer))
-            _rigidBody.velocity = new Vector2(_rigidBody.velocity.x, _jumpForce);
+        // print("Jump: " + Input.GetButtonDown("Jump") + " " + _collider.IsTouchingLayers(groundLayer));
+        if (Input.GetButtonDown("Jump") && _collider.IsTouchingLayers(groundLayer))
+            _rigidBody.velocity = new Vector2(_rigidBody.velocity.x, jumpForce);
+
+        // TODO: сделать что-то с этим!! заменить 20f и выделение целого слоя под лужи 
+        // ОЧЕНЬ сомнительное решение, но пока так
+        if (_collider.IsTouchingLayers(groundObjectsLayer))
+            _rigidBody.velocity = new Vector2(20f * direction, _rigidBody.velocity.y);
 
         UpdateState();
     }
@@ -63,23 +73,20 @@ public class Courier : MonoBehaviour
     {
         switch (_state)
         {
-            case CourierState.Running:
-                break;
             case CourierState.Sliding:
                 if (!Input.GetKey("left shift"))
                     _state = CourierState.Running;
                 break;
         }
 
-        if (Mathf.Abs(_rigidBody.velocity.x) > 0)
-            _state = CourierState.Running;
-        else _state = CourierState.Idle;
+        _state = Mathf.Abs(_rigidBody.velocity.x) > 0 
+            ? CourierState.Running : CourierState.Idle;
         
         if (Input.GetKey("left shift"))
             _state = CourierState.Sliding;
         
-        print("State: " + _state);
-        _animator.SetInteger("State", (int) _state);
+        // print("State: " + _state);
+        _animator.SetInteger(State, (int) _state);
     }
 
     private void OnTriggerEnter2D(Collider2D other)

@@ -5,5 +5,5 @@ public enum CourierState
     Jumping = 2,
     Falling = 3,
     Sliding = 4,
-    Damaged
+    // Damaged = 5
 }
