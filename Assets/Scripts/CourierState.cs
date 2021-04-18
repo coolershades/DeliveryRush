@@ -1,8 +1,9 @@
 public enum CourierState
 {
     Idle = 0,
-    Run = 1,
-    Jump = 2,
-    Fall = 3,
-    Slide = 4
+    Running = 1,
+    Jumping = 2,
+    Falling = 3,
+    Sliding = 4,
+    Damaged
 }
