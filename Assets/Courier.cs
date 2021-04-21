@@ -25,6 +25,7 @@ public class Courier : MonoBehaviour
 
     [SerializeField] private float speed;
     [SerializeField] private float jumpForce;
+    [SerializeField] private float slidingMultiplier; // ужасное название, надо как-то переименовать
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private LayerMask groundObjectsLayer;
     [SerializeField] private Text damageTextField;  
@@ -33,9 +34,10 @@ public class Courier : MonoBehaviour
 
     void Start()
     {
-        speed = 7;
+        speed = 10;
         jumpForce = 10;
         ParcelDamageStatus = 0;
+        slidingMultiplier = 1.6f;
         
         _rigidBody = GetComponent<Rigidbody2D>();
         _collider = GetComponent<Collider2D>();
@@ -55,18 +57,25 @@ public class Courier : MonoBehaviour
 
         if (hDirection != 0)
         {
-            _rigidBody.velocity = new Vector2(direction * speed, _rigidBody.velocity.y);
+            _rigidBody.velocity = _state != CourierState.Sliding 
+                ? new Vector2(direction * speed, _rigidBody.velocity.y) 
+                : new Vector2(direction * speed * slidingMultiplier, _rigidBody.velocity.y);
+
             transform.localScale = new Vector2(direction, 1);
         }
 
         // print("Jump: " + Input.GetButtonDown("Jump") + " " + _collider.IsTouchingLayers(groundLayer));
         if (Input.GetButtonDown("Jump") && _collider.IsTouchingLayers(groundLayer))
+        {
             _rigidBody.velocity = new Vector2(_rigidBody.velocity.x, jumpForce);
+            _state = CourierState.Jumping;
+        }
 
+        // скольжение по лужам
         // TODO: сделать что-то с этим!! заменить 20f и выделение целого слоя под лужи 
         // ОЧЕНЬ сомнительное решение, но пока так
         if (_collider.IsTouchingLayers(groundObjectsLayer))
-            _rigidBody.velocity = new Vector2(20f * direction, _rigidBody.velocity.y);
+            _rigidBody.velocity = new Vector2(10f * direction + _rigidBody.velocity.x, _rigidBody.velocity.y);
 
         UpdateState();
     }
@@ -79,13 +88,26 @@ public class Courier : MonoBehaviour
                 if (!Input.GetKey("left shift"))
                     _state = CourierState.Running;
                 break;
+            case CourierState.Jumping:
+                if (_rigidBody.velocity.y < 0)
+                    _state = CourierState.Falling;
+                break;
+            case CourierState.Falling:
+                if (_collider.IsTouchingLayers(groundLayer))
+                {
+                    _state = CourierState.Idle;
+                    if (Input.GetKey("left shift") && Mathf.Abs(_rigidBody.velocity.x) > 0)
+                        _state = CourierState.Sliding;
+                }
+                break;
+            default:
+                _state = Mathf.Abs(_rigidBody.velocity.x) > 0 && _state != CourierState.Sliding
+                    ? CourierState.Running : CourierState.Idle;
+                
+                if (Input.GetKey("left shift"))
+                    _state = CourierState.Sliding;
+                break;
         }
-        
-        _state = Mathf.Abs(_rigidBody.velocity.x) > 0 && _state != CourierState.Sliding
-            ? CourierState.Running : CourierState.Idle;
-
-        if (Input.GetKey("left shift"))
-            _state = CourierState.Sliding;
         
         print("State: " + _state);
         _animator.SetInteger(State, (int) _state);

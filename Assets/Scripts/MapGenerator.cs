@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
+using UnityEditor;
 
 namespace DefaultNamespace
 {
@@ -68,7 +70,7 @@ namespace DefaultNamespace
         {
             var map = new List<Area>();
             var r = new Random();
-            var mapLength = r.Next(MIN_MAP_LENGTH, MAX_MAP_LENGTH);
+            // var mapLength = r.Next(MIN_MAP_LENGTH, MAX_MAP_LENGTH);
             map.Add(Area.Restaurant);
 
             var order = new List<Area> {Area.Downtown, Area.Residential, Area.Poor, Area.Residential};
@@ -79,6 +81,8 @@ namespace DefaultNamespace
             }
 
             map.Add(Area.Yard);
+            
+            
             return map;
         }
     }
@@ -89,6 +93,17 @@ namespace DefaultNamespace
         {
             for (var i = 0; i < repeats; i++)
                 list.Add(item);
+        }
+
+        public static string ToString(this List<Area> map)
+        {
+            var s = new StringBuilder();
+            foreach (var area in map)
+            {
+                s.Append(area.ToString()).Append(" ");
+            }
+
+            return s.ToString();
         }
     }
 }
