@@ -1,6 +1,7 @@
 using System;
 using DefaultNamespace;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Courier : MonoBehaviour
 {
@@ -26,6 +27,7 @@ public class Courier : MonoBehaviour
     [SerializeField] private float jumpForce;
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private LayerMask groundObjectsLayer;
+    [SerializeField] private Text damageTextField;  
     
     private static readonly int State = Animator.StringToHash("State");
 
@@ -49,7 +51,7 @@ public class Courier : MonoBehaviour
     private void ManageMovement()
     {
         var hDirection = Input.GetAxis("Horizontal");
-        var direction = hDirection > 0 ? 1 : -1;
+        var direction = hDirection.CompareTo(0);
 
         if (hDirection != 0)
         {
@@ -78,14 +80,14 @@ public class Courier : MonoBehaviour
                     _state = CourierState.Running;
                 break;
         }
-
-        _state = Mathf.Abs(_rigidBody.velocity.x) > 0 
-            ? CourierState.Running : CourierState.Idle;
         
+        _state = Mathf.Abs(_rigidBody.velocity.x) > 0 && _state != CourierState.Sliding
+            ? CourierState.Running : CourierState.Idle;
+
         if (Input.GetKey("left shift"))
             _state = CourierState.Sliding;
         
-        // print("State: " + _state);
+        print("State: " + _state);
         _animator.SetInteger(State, (int) _state);
     }
 
@@ -103,6 +105,8 @@ public class Courier : MonoBehaviour
     private void DamageParcel(float damage)
     {
         ParcelDamageStatus += damage;
+        damageTextField.text = ParcelDamageStatus * 100 + "%";
+        
         print("Parcel damaged! Damage: " + ParcelDamageStatus);
         if (ParcelDamageStatus >= 1)
             print("Parcel is at critical damage. You have to restart the game.");
