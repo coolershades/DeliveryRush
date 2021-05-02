@@ -113,13 +113,28 @@ public class Courier : MonoBehaviour
         _animator.SetInteger(State, (int) _state);
     }
 
+    // TODO: переснести логику соприкосновений в Obstacle!
     private void OnTriggerEnter2D(Collider2D other)
     {
         switch (other.tag)
         {
-            case Tag.PigeonFlock:
+            case Tag.PIGEON_FLOCK:
                 if (_state != CourierState.Sliding)
                     DamageParcel(0.25f);
+                break;
+            case Tag.OBSTACLE:
+                DamageParcel(0.2f);
+                break;
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        switch (other.gameObject.tag)
+        {
+            case Tag.CAR:
+                // if (transform.position.y - other.gameObject.transform.position.y < )
+                // DamageParcel(0.3f);
                 break;
         }
     }

@@ -21,8 +21,8 @@ namespace DefaultNamespace
         private const int MIN_MAP_LENGTH = 10;
         private const int MAX_MAP_LENGTH = 15;
         
-        private const int MinAreaLength = 2;
-        private const int MaxAreaLength = 4;
+        private const int MinAreaLength = 3;
+        private const int MaxAreaLength = 6;
 
         // TODO!!!
         /*private static readonly Dictionary<Tuple<Area, Area>, double> TransitionsProbabilities = 
@@ -79,10 +79,8 @@ namespace DefaultNamespace
                 var areaLength = r.Next(MinAreaLength, MaxAreaLength);
                 map.AddMultiple(area, areaLength);
             }
-
             map.Add(Area.Yard);
-            
-            
+
             return map;
         }
     }
