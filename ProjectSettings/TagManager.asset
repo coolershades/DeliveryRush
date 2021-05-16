@@ -63,3 +63,9 @@ TagManager:
   - name: Foreground
     uniqueID: 1902260799
     locked: 0
+  - name: UI Elements
+    uniqueID: 2074419291
+    locked: 0
+  - name: Overlay panel
+    uniqueID: 4025998861
+    locked: 0

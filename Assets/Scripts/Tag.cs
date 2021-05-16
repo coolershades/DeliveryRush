@@ -1,4 +1,4 @@
-﻿namespace DefaultNamespace
+﻿namespace DeliveryRush
 {
     // При изменении имён тэгов не забывай менять теги и в редакторе Unity!
     

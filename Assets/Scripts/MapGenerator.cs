@@ -3,17 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEditor;
 
-namespace DefaultNamespace
+namespace DeliveryRush
 {
-    public enum Area
-    {
-        Restaurant,
-        Downtown,
-        Residential,
-        Poor,
-        Yard
-    }
-
     public class MapGenerator
     {
         // Temporary values, I'll have to change them soon
@@ -66,20 +57,20 @@ namespace DefaultNamespace
             return map;
         }*/
 
-        public static List<Area> GenerateMap()
+        public static List<AreaType> GenerateMap()
         {
-            var map = new List<Area>();
+            var map = new List<AreaType>();
             var r = new Random();
             // var mapLength = r.Next(MIN_MAP_LENGTH, MAX_MAP_LENGTH);
-            map.Add(Area.Restaurant);
+            map.Add(AreaType.Restaurant);
 
-            var order = new List<Area> {Area.Downtown, Area.Residential, Area.Poor, Area.Residential};
+            var order = new List<AreaType> {AreaType.Downtown, AreaType.Residential, AreaType.Poor, AreaType.Residential};
             foreach (var area in order)
             {
                 var areaLength = r.Next(MinAreaLength, MaxAreaLength);
                 map.AddMultiple(area, areaLength);
             }
-            map.Add(Area.Yard);
+            map.Add(AreaType.Yard);
 
             return map;
         }
@@ -93,7 +84,7 @@ namespace DefaultNamespace
                 list.Add(item);
         }
 
-        public static string ToString(this List<Area> map)
+        public static string ToString(this List<AreaType> map)
         {
             var s = new StringBuilder();
             foreach (var area in map)
