@@ -1,7 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 using UnityEditor;
+using UnityEngine;
+using Random = System.Random;
 
 namespace DeliveryRush
 {
@@ -15,7 +16,6 @@ namespace DeliveryRush
         private const int MinAreaLength = 3;
         private const int MaxAreaLength = 6;
 
-        // TODO!!!
         /*private static readonly Dictionary<Tuple<Area, Area>, double> TransitionsProbabilities = 
             new Dictionary<Tuple<Area, Area>, double>
             {
@@ -57,7 +57,18 @@ namespace DeliveryRush
             return map;
         }*/
 
-        public static List<AreaType> GenerateMap()
+        private static readonly Dictionary<AreaType, BuildingType[]> PossibleBuildings
+            = new Dictionary<AreaType, BuildingType[]>
+            {
+                {AreaType.Restaurant, new [] {BuildingType.None}},
+                {AreaType.Downtown, new [] {BuildingType.None}},
+                {AreaType.Residential, new [] {BuildingType.Flat1, BuildingType.Flat2, 
+                    BuildingType.ConvStore1, BuildingType.ConvStore2, BuildingType.ConvStore3}},
+                {AreaType.Poor, new [] {BuildingType.None}},
+                {AreaType.Yard, new [] {BuildingType.None}}
+            };
+        
+        public static List<AreaType> GenerateAreaTypeMap()
         {
             var map = new List<AreaType>();
             var r = new Random();
@@ -73,6 +84,24 @@ namespace DeliveryRush
             map.Add(AreaType.Yard);
 
             return map;
+        }
+
+        public static BuildingType[] GenerateBuildingTypeArea(AreaType areaType)
+        {
+            var rand = new Random();
+            var areaLength = rand.Next(MinAreaLength, MaxAreaLength);
+            var result = new BuildingType[areaLength];
+
+            for (var i = 0; i < areaLength; i++)
+            {
+                var index = rand.Next(0, PossibleBuildings[areaType].Length - 1);
+                var type = PossibleBuildings[areaType][index];
+                /*var building = new Building(type);
+                building.GenerateObstacles();*/
+                result[i] = type;
+            }
+            
+            return result;
         }
     }
 

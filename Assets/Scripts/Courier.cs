@@ -1,17 +1,15 @@
 using System;
-using DeliveryRush;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class Courier : MonoBehaviour
 {
-    private CourierState _state;
+    public CourierState State { get; private set; }
     private static float _parcelDamageStatus;
 
     public static float ParcelDamageStatus
     {
         get => _parcelDamageStatus;
-        set
+        private set
         {
             if (value >= 0 && value <= 1)
                 _parcelDamageStatus = value;
@@ -32,14 +30,11 @@ public class Courier : MonoBehaviour
     [SerializeField] private float slidingMultiplier; // ужасное название, надо как-то переименовать
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private LayerMask groundObjectsLayer;
-    // [SerializeField] private Text damageTextField;
-    [SerializeField] private UIManager _uiManager;
-    
-    [SerializeField] private Image damageStatusBar;
-    
-    private static readonly int State = Animator.StringToHash("State");
+    [SerializeField] private UIManager uiManager;
 
-    void Start()
+    private static readonly int EditorStateHash = Animator.StringToHash("State");
+
+    private void Start()
     {
         speed = 10;
         jumpForce = 10;
@@ -52,7 +47,7 @@ public class Courier : MonoBehaviour
     }
 
     
-    void Update()
+    private void Update()
     {
         ManageMovement();
     }
@@ -64,7 +59,7 @@ public class Courier : MonoBehaviour
 
         if (hDirection != 0)
         {
-            _rigidBody.velocity = _state != CourierState.Sliding 
+            _rigidBody.velocity = State != CourierState.Sliding 
                 ? new Vector2(direction * speed, _rigidBody.velocity.y) 
                 : new Vector2(direction * speed * slidingMultiplier, _rigidBody.velocity.y);
 
@@ -75,7 +70,7 @@ public class Courier : MonoBehaviour
         if (Input.GetButtonDown("Jump") && _collider.IsTouchingLayers(groundLayer))
         {
             _rigidBody.velocity = new Vector2(_rigidBody.velocity.x, jumpForce);
-            _state = CourierState.Jumping;
+            State = CourierState.Jumping;
         }
 
         // скольжение по лужам
@@ -89,73 +84,42 @@ public class Courier : MonoBehaviour
 
     private void UpdateState()
     {
-        switch (_state)
+        switch (State)
         {
             case CourierState.Sliding:
                 if (!Input.GetKey("left shift"))
-                    _state = CourierState.Running;
+                    State = CourierState.Running;
                 break;
             case CourierState.Jumping:
                 if (_rigidBody.velocity.y < 0)
-                    _state = CourierState.Falling;
+                    State = CourierState.Falling;
                 break;
             case CourierState.Falling:
                 if (_collider.IsTouchingLayers(groundLayer))
                 {
-                    _state = CourierState.Idle;
+                    State = CourierState.Idle;
                     if (Input.GetKey("left shift") && Mathf.Abs(_rigidBody.velocity.x) > 0)
-                        _state = CourierState.Sliding;
+                        State = CourierState.Sliding;
                 }
                 break;
             default:
-                _state = Mathf.Abs(_rigidBody.velocity.x) > 0 && _state != CourierState.Sliding
+                State = Mathf.Abs(_rigidBody.velocity.x) > 0 && State != CourierState.Sliding
                     ? CourierState.Running : CourierState.Idle;
                 
                 if (Input.GetKey("left shift"))
-                    _state = CourierState.Sliding;
+                    State = CourierState.Sliding;
                 break;
         }
         
         // print("State: " + _state);
-        _animator.SetInteger(State, (int) _state);
+        _animator.SetInteger(EditorStateHash, (int) State);
     }
 
-    // TODO: переснести логику соприкосновений в Obstacle!
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        switch (other.tag)
-        {
-            case Tag.PIGEON_FLOCK:
-                if (_state != CourierState.Sliding)
-                    DamageParcel(0.25f);
-                break;
-            /*case Tag.OBSTACLE:
-                DamageParcel(0.2f);
-                break;*/
-        }
-    }
-
-    private void OnCollisionEnter2D(Collision2D other)
-    {
-        switch (other.gameObject.tag)
-        {
-            case Tag.CAR:
-                // if (transform.position.y - other.gameObject.transform.position.y < )
-                // DamageParcel(0.3f);
-                break;
-            case Tag.OBSTACLE:
-                DamageParcel(0.2f);
-                break;
-        }
-    }
-
-    private void DamageParcel(float damage)
+    public void DamageParcel(float damage)
     {
         ParcelDamageStatus += damage;
-        _uiManager.UpdateStatusBar();
-        
-        // damageStatusBar.sprite = 
-        
+        uiManager.UpdateStatusBar();
+
         print("Parcel damaged! Damage: " + ParcelDamageStatus + ", " + ParcelDamageStatus);
         if (ParcelDamageStatus >= 1)
             print("Parcel is at critical damage. You have to restart the game."); 

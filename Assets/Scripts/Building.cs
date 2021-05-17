@@ -64,7 +64,7 @@ namespace DeliveryRush
                 }},
             };
         
-        public Building GenerateBuilding()
+        public Building GenerateObstacles()
         {
             if (_buildingType == BuildingType.None) return null;
 
