@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
+using Random = System.Random;
 
 namespace DeliveryRush
 {
@@ -11,7 +13,7 @@ namespace DeliveryRush
         // Flats in residential area
         Flat1,
         Flat2,
-        
+            
         // Convenience stores (e.g. 5ka)
         ConvStore1,
         ConvStore2,
@@ -21,101 +23,88 @@ namespace DeliveryRush
     public class Building : MonoBehaviour
     {
         private readonly BuildingType _buildingType;
-        [SerializeField] protected List<Obstacle> _obstacles = new List<Obstacle>();
-
-        // все возможные точки спавна чего-либо
-        // нужно для того, чтобы не заспавнить на одном и том же месте два предмета
-        // TODO: для каждого здания добавить точку для полёта голубей!!!
-        private static readonly Dictionary<BuildingType, Vector3[]> Positions
-            = new Dictionary<BuildingType, Vector3[]>
-            {
-                {BuildingType.Flat1, new []
-                {
-                    new Vector3(0, 0, 0)
-                }},
-                {BuildingType.Flat2, new []
-                {
-                    new Vector3(0, 0, 0)
-                }}
-            };
-        
-        // занято ли уже какое-то место для спавна
-        private readonly Dictionary<Vector3, bool> _freePositions;
+        // [SerializeField] protected List<Obstacle> _obstacles = new List<Obstacle>();
 
         public Building(BuildingType buildingType)
         {
             _buildingType = buildingType;
             
-            _freePositions = new Dictionary<Vector3, bool>();
-            foreach (var position in Positions[_buildingType])
-                _freePositions.Add(position, true);
+            _freePositions = new bool[Positions[_buildingType].Length];
+            for (var i = 0; i < _freePositions.Length; i++)
+                _freePositions[i] = true;
             // => изначально все возможные точки для спавна пусты.
         }
 
-        // TODO: откорректировать значения!!!
-        // для голубей задать высоту из класса
+        // занято ли уже какое-то место для спавна
+        private readonly bool[] _freePositions;
         
+        // TODO: откорректировать значения!!! здесь пока только временные
         /* Каждому типу зданий соответсвуют подходящие позиции для препятствий. */
-        private static readonly Dictionary<BuildingType, ObstacleInfo[]> _possibleObstaclePositions
-            = new Dictionary<BuildingType, ObstacleInfo[]>
+        private static readonly Dictionary<BuildingType, PositionInfo[]> Positions
+            = new Dictionary<BuildingType, PositionInfo[]>
             {
                 {BuildingType.Flat1, new []
                 {
-                        new ObstacleInfo(ObstacleType.Pigeon, new []
-                        {
-                            new ObstacleInfo.PositionInfo(BuildingType.Flat1, 0, 0.2)
-                        }),
-                        new ObstacleInfo(ObstacleType.TrashCan, new []
-                        {
-                            new ObstacleInfo.PositionInfo(BuildingType.Flat1, 1, 0.2)
-                        })
+                    new PositionInfo(
+                        new Vector3(0,Pigeons.FlightHeight,0), 
+                        new PositionInfo.ObstacleInfo(ObstacleType.Pigeon, 0.2),
+                        0),
+                    new PositionInfo(
+                        new Vector3(0,0,0),
+                        new PositionInfo.ObstacleInfo(ObstacleType.TrashCan, 0.2),
+                        1)
                 }},
                 
                 {BuildingType.Flat2, new []
                 {
-                    new ObstacleInfo(ObstacleType.Pigeon, new []
-                    {
-                        new ObstacleInfo.PositionInfo(BuildingType.Flat2, 0, 0.1)
-                    })
+                    new PositionInfo(
+                        new Vector3(0,Pigeons.FlightHeight,0),
+                        new PositionInfo.ObstacleInfo(ObstacleType.Pigeon, 0.1),
+                        0)
                 }},
-                
-                /*{BuildingType.ConvStore1, new ObstacleInfo[0]},
-                {BuildingType.ConvStore2, new ObstacleInfo[0]},
-                {BuildingType.ConvStore3, new ObstacleInfo[0]},*/
             };
         
-        void GenerateBuilding()
+        public Building GenerateBuilding()
         {
-            if (_buildingType == BuildingType.None) return;
-            
-            
+            if (_buildingType == BuildingType.None) return null;
+
+            var rand = new Random();
+            foreach (var position in Positions[_buildingType])
+            {
+                var a = rand.NextDouble();
+                if (a <= position.Info.SpawnProbability && _freePositions[position.PositionNumber])
+                {
+                    // спавним препятствие и занимаем позицию
+                    _freePositions[position.PositionNumber] = false;
+                }
+            }
+
+            return this;
         }
 
-        private class ObstacleInfo
+        public class PositionInfo
         {
-            // ObType должен соответствовать единственный PossiblePositions[] 
-            // в пределе одного типа зданий.
-            
-            public ObstacleType ObType;
-            public PositionInfo[] PossiblePositions;
+            // public BuildingType BuildType; 
+            public Vector3 Position;
+            public ObstacleInfo Info;
+            public int PositionNumber; // порядковый номер в списке для некоторого типа здания. не должен повторяться в списке в пределе одного здания
 
-            public ObstacleInfo(ObstacleType obType, PositionInfo[] possiblePositions)
+            public PositionInfo(Vector3 position, ObstacleInfo info, int positionNumber = -1)
             {
-                ObType = obType;
-                PossiblePositions = possiblePositions;
+                Position = position;
+                Info = info;
+                PositionNumber = positionNumber;
             }
-            
-            public class PositionInfo
+
+            public class ObstacleInfo
             {
-                public Vector3 Position;
-                // public int PositionNumber; // не уверена, что может пригодиться, но на всякий путь будет
+                // ObstacleType можно заменить на Obstacle, будет в разы удобнее спавнить
+                public ObstacleType ObType;
                 public double SpawnProbability;
 
-                public PositionInfo(BuildingType buildingType, int positionNumber, double spawnProbability)
+                public ObstacleInfo(ObstacleType obstacleType, double spawnProbability = 0)
                 {
-                    // positionNumber -- номер позиции спавна из списка, соответсвующему некоторому
-                    // типу здания
-                    Position = Positions[buildingType][positionNumber];
+                    ObType = obstacleType;
                     SpawnProbability = spawnProbability;
                 }
             }
