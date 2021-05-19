@@ -2,10 +2,7 @@ using UnityEngine;
 
 public class CameraManager : MonoBehaviour
 {
-#pragma warning disable 0649
-    [SerializeField] Transform player;
-#pragma warning restore 0649
-
+    [SerializeField] private Transform player;
     private Vector3 _shift = Vector3.zero;
 
     private void Start()

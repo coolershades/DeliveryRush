@@ -5,10 +5,8 @@ namespace DeliveryRush
 {
     public class LevelGenerator : MonoBehaviour
     {
-#pragma warning disable 0649
         [SerializeField] List<Area> areasList;
         [SerializeField] float areasShift = 5f;
-#pragma warning restore 0649
 
         private Vector3 _nextSpawn = Vector3.zero;
         private static GameObject _ground;
@@ -29,32 +27,32 @@ namespace DeliveryRush
             get
             {
                 if (_crossRoad == null)
-                    _crossRoad = Resources.Load<GameObject>("Prefabs/RoadCross");
+                    _crossRoad = Resources.Load<GameObject>("Prefabs/CrossRoad");
                 return _crossRoad;
             }
         }
 
         public void Generate()
         {
-            List<Transform> childs = new List<Transform>();
+            var children = new List<Transform>();
 
-            foreach (Area area in areasList)
+            foreach (var area in areasList)
             {
-                childs.Add(Spawn(area));
+                children.Add(Spawn(area));
                 AddSpace(areasShift);
             }
 
             SpawnGround();
 
-            for (int i = 0; i < childs.Count - 1; i++)
+            for (var i = 0; i < children.Count - 1; i++)
             {
-                Transform a1 = childs[i];
-                Transform a2 = childs[i + 1];
+                var a1 = children[i];
+                var a2 = children[i + 1];
 
-                Vector3 middlePoint = a1.localPosition + (a2.localPosition - a1.localPosition) * .5f;
+                var middlePoint = a1.localPosition + (a2.localPosition - a1.localPosition) * .5f;
                 middlePoint.x += 17f;
 
-                Transform road = Instantiate(CrossRoad, transform).transform;
+                var road = Instantiate(CrossRoad, transform).transform;
                 road.localPosition = middlePoint;
             }
         }
@@ -79,7 +77,7 @@ namespace DeliveryRush
 
         private void SpawnGround()
         {
-            GameObject ground = Instantiate(Ground, transform);
+            var ground = Instantiate(Ground, transform);
             ground.transform.localScale = new Vector3(1000f, 1f, 0f);
         }
     }

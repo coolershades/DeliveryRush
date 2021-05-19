@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Text;
-using UnityEditor;
 using UnityEngine;
 using Random = System.Random;
 
@@ -13,8 +12,8 @@ namespace DeliveryRush
         private const int MIN_MAP_LENGTH = 10;
         private const int MAX_MAP_LENGTH = 15;
         
-        private const int MinAreaLength = 3;
-        private const int MaxAreaLength = 6;
+        private const int MinAreaLength = 2;
+        private const int MaxAreaLength = 3;
 
         /*private static readonly Dictionary<Tuple<Area, Area>, double> TransitionsProbabilities = 
             new Dictionary<Tuple<Area, Area>, double>
@@ -57,18 +56,19 @@ namespace DeliveryRush
             return map;
         }*/
 
-        private static readonly Dictionary<AreaType, BuildingType[]> PossibleBuildings
-            = new Dictionary<AreaType, BuildingType[]>
+        private static readonly Dictionary<AreaType, GameObjectType[]> PossibleBuildings
+            = new Dictionary<AreaType, GameObjectType[]>
             {
-                {AreaType.Restaurant, new [] {BuildingType.None}},
-                {AreaType.Downtown, new [] {BuildingType.None}},
-                {AreaType.Residential, new [] {BuildingType.Flat1, BuildingType.Flat2, 
-                    BuildingType.ConvStore1, BuildingType.ConvStore2, BuildingType.ConvStore3}},
-                {AreaType.Poor, new [] {BuildingType.None}},
-                {AreaType.Yard, new [] {BuildingType.None}}
+                {AreaType.Restaurant, new [] {GameObjectType.Restaurant1}},
+                {AreaType.Downtown, new [] {GameObjectType.Boutique1}},
+                {AreaType.Residential, new [] {GameObjectType.Flat1, GameObjectType.Flat2, 
+                    GameObjectType.ConvStore1, GameObjectType.ConvStore2, GameObjectType.ConvStore3}},
+                {AreaType.Poor, new [] {GameObjectType.PoorFlat1}},
+                {AreaType.Yard, new [] {GameObjectType.Yard1}},
+                {AreaType.CrossRoad, new [] {GameObjectType.CrossRoad}}
             };
         
-        public static List<AreaType> GenerateAreaTypeMap()
+        public static AreaType[] GenerateAreaTypeMap()
         {
             var map = new List<AreaType>();
             var r = new Random();
@@ -79,49 +79,45 @@ namespace DeliveryRush
             foreach (var area in order)
             {
                 var areaLength = r.Next(MinAreaLength, MaxAreaLength);
-                map.AddMultiple(area, areaLength);
+                // map.AddMultiple(area, areaLength);
+                map.Add(area);
+                map.Add(AreaType.CrossRoad); // TODO!!! добавляется последний лишний переход
             }
             map.Add(AreaType.Yard);
 
-            return map;
+            return map.ToArray();
         }
 
-        public static BuildingType[] GenerateBuildingTypeArea(AreaType areaType)
+        public static List<GameObjectType> GenerateBuildingTypeArea(AreaType areaType)
         {
             var rand = new Random();
             var areaLength = rand.Next(MinAreaLength, MaxAreaLength);
-            var result = new BuildingType[areaLength];
+
+            if (areaType == AreaType.Restaurant || areaType == AreaType.Yard || areaType == AreaType.CrossRoad)
+                areaLength = 1;
+            
+            var result = new List<GameObjectType>();
 
             for (var i = 0; i < areaLength; i++)
             {
                 var index = rand.Next(0, PossibleBuildings[areaType].Length - 1);
                 var type = PossibleBuildings[areaType][index];
-                /*var building = new Building(type);
-                building.GenerateObstacles();*/
-                result[i] = type;
+                result.Add(type);
             }
             
             return result;
         }
-    }
 
-    public static class ListExtensions
-    {
-        public static void AddMultiple<TItem>(this List<TItem> list, TItem item, int repeats)
+        public static GameObjectType[] GenerateTypeMap(AreaType[] map)
         {
-            for (var i = 0; i < repeats; i++)
-                list.Add(item);
-        }
-
-        public static string ToString(this List<AreaType> map)
-        {
-            var s = new StringBuilder();
-            foreach (var area in map)
+            var result = new List<GameObjectType>();
+            for (var i = 0; i < map.Length; i++)
             {
-                s.Append(area.ToString()).Append(" ");
+                var areaMap = GenerateBuildingTypeArea(map[i]);
+                result.AddRange(areaMap);
             }
-
-            return s.ToString();
+            
+            return result.ToArray();
         }
     }
 }

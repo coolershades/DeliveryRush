@@ -9,15 +9,16 @@ namespace DeliveryRush
         Downtown,
         Residential,
         Poor,
-        Yard
+        Yard, 
+        CrossRoad
     }
     
     public class Area : MonoBehaviour
     {
-        [SerializeField] List<Obstacle> obstacles;
-        [SerializeField] int obstaclesCount = 3;
-        [SerializeField] float obstaclesShift = 5f;
-        [SerializeField] AreaType areaType;
+        [SerializeField] private List<Obstacle> obstacles;
+        [SerializeField] private int obstaclesCount = 3;
+        [SerializeField] private float obstaclesShift = 5f;
+        // [SerializeField] private AreaType areaType;
 
         public void GenerateObstacles()
         {
@@ -27,10 +28,10 @@ namespace DeliveryRush
                 return;
             }
 
-            Vector3 spawn = Vector3.zero;
-            for (int i = 0; i < obstaclesCount; i++)
+            var spawn = Vector3.zero;
+            for (var i = 0; i < obstaclesCount; i++)
             {
-                Obstacle obstacle = obstacles[Random.Range(0, obstacles.Count)];
+                var obstacle = obstacles[Random.Range(0, obstacles.Count)];
                 Instantiate(obstacle, spawn + obstacle.transform.position, 
                     Quaternion.identity, transform.Find("Obstacles"));
                 spawn.x += obstaclesShift;
@@ -39,7 +40,7 @@ namespace DeliveryRush
 
         public void Clear()
         {
-            Transform obstaclesWrap = transform.Find("Obstacles");
+            var obstaclesWrap = transform.Find("Obstacles");
             while (obstaclesWrap.childCount > 0)
             {
                 DestroyImmediate(obstaclesWrap.GetChild(0).gameObject);

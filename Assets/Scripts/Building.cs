@@ -1,97 +1,127 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
 using Random = System.Random;
 
 namespace DeliveryRush
 {
-    public enum BuildingType
-    {
-        None,
-        
-        // Flats in residential area
-        Flat1,
-        Flat2,
-            
-        // Convenience stores (e.g. 5ka)
-        ConvStore1,
-        ConvStore2,
-        ConvStore3
-    }
-    
     public class Building : MonoBehaviour
     {
-        private readonly BuildingType _buildingType;
+        public GameObjectType BuildingType;
+        // [SerializeField] private GameObjectType _buildingType;
+        
         // [SerializeField] protected List<Obstacle> _obstacles = new List<Obstacle>();
 
-        public Building(BuildingType buildingType)
+        public Building(GameObjectType buildingType)
         {
-            _buildingType = buildingType;
+            BuildingType = buildingType;
             
-            _freePositions = new bool[Positions[_buildingType].Length];
-            for (var i = 0; i < _freePositions.Length; i++)
-                _freePositions[i] = true;
+            FreePositions = new bool[Positions[BuildingType].Length];
+            for (var i = 0; i < FreePositions.Length; i++)
+                FreePositions[i] = true;
             // => изначально все возможные точки для спавна пусты.
         }
 
         // занято ли уже какое-то место для спавна
-        private readonly bool[] _freePositions;
+        public bool[] FreePositions;
+        
+        private void Start()
+        {
+            FreePositions = new bool[Positions[BuildingType].Length];
+            for (var i = 0; i < FreePositions.Length; i++)
+                FreePositions[i] = true;
+            // => изначально все возможные точки для спавна пусты.
+        }
         
         // TODO: откорректировать значения!!! здесь пока только временные
         /* Каждому типу зданий соответсвуют подходящие позиции для препятствий. */
-        private static readonly Dictionary<BuildingType, PositionInfo[]> Positions
-            = new Dictionary<BuildingType, PositionInfo[]>
+        public static readonly Dictionary<GameObjectType, PositionInfo[]> Positions
+            = new Dictionary<GameObjectType, PositionInfo[]>
             {
-                {BuildingType.Flat1, new []
-                {
+                /* RESTAURANT */
+                {GameObjectType.Restaurant1, new [] {
                     new PositionInfo(
                         new Vector3(0,Pigeons.FlightHeight,0), 
-                        new PositionInfo.ObstacleInfo(ObstacleType.Pigeon, 0.2),
+                        new PositionInfo.ObstacleInfo(GameObjectType.Pigeon, 0.5),
                         0),
                     new PositionInfo(
                         new Vector3(0,0,0),
-                        new PositionInfo.ObstacleInfo(ObstacleType.TrashCan, 0.2),
+                        new PositionInfo.ObstacleInfo(GameObjectType.Car, 0.2),
                         1)
                 }},
                 
-                {BuildingType.Flat2, new []
+                /* DOWNTOWN */
+                {GameObjectType.Boutique1, new PositionInfo[0]},
+                
+                /* RESIDENTIAL */
+                {GameObjectType.Flat1, new []
+                {
+                    new PositionInfo(
+                        new Vector3(0,Pigeons.FlightHeight,0), 
+                        new PositionInfo.ObstacleInfo(GameObjectType.Pigeon, 0.9),
+                        0),
+                    new PositionInfo(
+                        new Vector3(0,0,0),
+                        new PositionInfo.ObstacleInfo(GameObjectType.TrashCan, 1),
+                        1)
+                }},
+                {GameObjectType.Flat2, new []
                 {
                     new PositionInfo(
                         new Vector3(0,Pigeons.FlightHeight,0),
-                        new PositionInfo.ObstacleInfo(ObstacleType.Pigeon, 0.1),
+                        new PositionInfo.ObstacleInfo(GameObjectType.Pigeon, 0.1),
+                        0),
+                    new PositionInfo(
+                        new Vector3(0,0,0),
+                        new PositionInfo.ObstacleInfo(GameObjectType.TrashCan, 1),
+                        1)
+                }},
+                {GameObjectType.ConvStore1, new PositionInfo[0]},
+                {GameObjectType.ConvStore2, new PositionInfo[0]},
+                {GameObjectType.ConvStore3, new PositionInfo[0]},
+                
+                /* POOR */
+                {GameObjectType.PoorFlat1, new PositionInfo[] {
+                    new PositionInfo(
+                        new Vector3(0,0,0),
+                        new PositionInfo.ObstacleInfo(GameObjectType.TrashCan, 1),
                         0)
                 }},
+                
+                /* YARD */
+                {GameObjectType.Yard1, new PositionInfo[0]},
+                
+                /* CROSSROAD */
+                {GameObjectType.CrossRoad, new PositionInfo[0]},
             };
         
-        public Building GenerateObstacles()
+        public void GenerateObstacles()
         {
-            if (_buildingType == BuildingType.None) return null;
-
+            Start();
+            
             var rand = new Random();
-            foreach (var position in Positions[_buildingType])
+            foreach (var position in Positions[BuildingType])
             {
                 var a = rand.NextDouble();
-                if (a <= position.Info.SpawnProbability && _freePositions[position.PositionNumber])
+                if (a <= position.Info.SpawnProbability && FreePositions[position.PositionNumber])
                 {
                     // спавним препятствие и занимаем позицию
-                    _freePositions[position.PositionNumber] = false;
+                    FreePositions[position.PositionNumber] = false;
                 }
             }
-
-            return this;
         }
 
         public class PositionInfo
         {
             // public BuildingType BuildType; 
-            public Vector3 Position;
+            
+            // Position is relative to it's parent's building spawnPoint
+            public Vector3 RelativePosition;
             public ObstacleInfo Info;
             public int PositionNumber; // порядковый номер в списке для некоторого типа здания. не должен повторяться в списке в пределе одного здания
 
-            public PositionInfo(Vector3 position, ObstacleInfo info, int positionNumber = -1)
+            public PositionInfo(Vector3 relativePosition, ObstacleInfo info, int positionNumber = -1)
             {
-                Position = position;
+                RelativePosition = relativePosition;
                 Info = info;
                 PositionNumber = positionNumber;
             }
@@ -99,10 +129,17 @@ namespace DeliveryRush
             public class ObstacleInfo
             {
                 // ObstacleType можно заменить на Obstacle, будет в разы удобнее спавнить
-                public ObstacleType ObType;
+                // public ObstacleType ObType;
+                public GameObjectType ObType;
                 public double SpawnProbability;
 
-                public ObstacleInfo(ObstacleType obstacleType, double spawnProbability = 0)
+                /*public ObstacleInfo(ObstacleType obstacleType, double spawnProbability = 0)
+                {
+                    ObType = obstacleType;
+                    SpawnProbability = spawnProbability;
+                }*/
+                
+                public ObstacleInfo(GameObjectType obstacleType, double spawnProbability = 0)
                 {
                     ObType = obstacleType;
                     SpawnProbability = spawnProbability;

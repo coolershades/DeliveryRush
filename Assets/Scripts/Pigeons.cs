@@ -4,7 +4,7 @@ using UnityEngine;
 public class Pigeons : Obstacle
 {
     // Start is called before the first frame update
-    public static float FlightHeight = 48;
+    public static float FlightHeight = 1;
     
     private bool _hasStarted;
     
