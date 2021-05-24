@@ -5,15 +5,22 @@
         // None,
         
         /* RESTAURANT */
-        Restaurant1,
+        // Restaurant1,
+        McDonalds,
         
         /* DOWNTOWN */
         Boutique1,
+        Boutique,
+        DodoPizza,
+        AlmaMater,
         
         /* RESIDENTIAL */
         // Flats in residential area
         Flat1,
         Flat2,
+        Flat3,
+        Flat4,
+        Flat5,
             
         // Convenience stores (e.g. 5ka)
         ConvStore1,

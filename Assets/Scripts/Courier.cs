@@ -1,22 +1,23 @@
 using System;
+using DeliveryRush;
 using UnityEngine;
 
 public class Courier : MonoBehaviour
 {
     public CourierState State { get; private set; }
-    private static float _parcelDamageStatus;
-
-    public static float ParcelDamageStatus
+    
+    private float _parcelDamageStatus;
+    public float ParcelDamageStatus
     {
         get => _parcelDamageStatus;
         private set
         {
-            if (value >= 0 && value <= 1)
+            if (value >= 0 && value < 1)
                 _parcelDamageStatus = value;
             else
             {
-                _parcelDamageStatus = 0;
-                throw new Exception("Value must be >= 0 and <= 1.");
+                _parcelDamageStatus = 1;
+                deathMenuManager.TriggerDeath();
             }
         }
     }
@@ -31,6 +32,7 @@ public class Courier : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private LayerMask groundObjectsLayer;
     [SerializeField] private UIManager uiManager;
+    [SerializeField] private DeathMenuManager deathMenuManager;
 
     private static readonly int EditorStateHash = Animator.StringToHash("State");
 
@@ -46,7 +48,6 @@ public class Courier : MonoBehaviour
         _animator = GetComponent<Animator>();
     }
 
-    
     private void Update()
     {
         ManageMovement();
@@ -119,9 +120,5 @@ public class Courier : MonoBehaviour
     {
         ParcelDamageStatus += damage;
         uiManager.UpdateStatusBar();
-
-        print("Parcel damaged! Damage: " + ParcelDamageStatus + ", " + ParcelDamageStatus);
-        if (ParcelDamageStatus >= 1)
-            print("Parcel is at critical damage. You have to restart the game."); 
     }
 }

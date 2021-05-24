@@ -8,7 +8,6 @@ public class PauseMenuManager : MonoBehaviour
     private void Start()
     {
         Resume();
-        
     }
 
     private void Update()

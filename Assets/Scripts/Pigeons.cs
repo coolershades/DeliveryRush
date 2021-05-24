@@ -34,7 +34,7 @@ public class Pigeons : Obstacle
     {
         var courier = other.gameObject.GetComponent<Courier>(); 
         if (courier == null) return; // courier is null => exit
-        
+
         if (courier.State != CourierState.Sliding)
             courier.DamageParcel(0.25f);
     }

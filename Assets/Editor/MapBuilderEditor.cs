@@ -14,6 +14,7 @@ namespace DeliveryRush
 
             if (GUILayout.Button("Build Random Map"))
             {
+                manager.Clear();
                 var map = MapGenerator.GenerateTypeMap(MapGenerator.GenerateAreaTypeMap());
                 manager.BuildMap(map);
             }

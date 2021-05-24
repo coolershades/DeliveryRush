@@ -23,15 +23,14 @@ namespace DeliveryRush
             return s.ToString();
         }
     }
-
-    // TODO: пофиксить метод GetWidth()
+    
     public static class GameObjectExtensions
     {
-        /*public static float GetWidth(this GameObject gameObject) 
-            => ((RectTransform) gameObject.transform).rect.width;*/
+        public static float GetWidth(this GameObject gameObject)
+            => ((RectTransform) gameObject.transform).rect.width;
         
-        public static float GetWidth(this GameObject gameObject) 
-            => 10f;
+        public static float GetHeight(this GameObject gameObject)
+            => ((RectTransform) gameObject.transform).rect.height;
     }
     
     /*public static class ArrayExtensions
