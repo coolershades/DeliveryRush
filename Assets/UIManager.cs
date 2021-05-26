@@ -7,7 +7,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Image _statusBar;
     [SerializeField] private Courier _courier;
     
-    [SerializeField] private CountdownManager _countdownManager;
+    // [SerializeField] private CountdownManager _countdownManager;
 
     public void UpdateStatusBar()
     {

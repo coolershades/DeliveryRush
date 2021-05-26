@@ -11,9 +11,11 @@ namespace DeliveryRush
         private Vector3 _groundNextSpawn = Vector3.zero;
         
         [SerializeField] private float _spacing = 0.35f;
-        [SerializeField] private CountdownManager _countdownManager;
-
+        
         private int BuildingsCount;
+        [SerializeField] private CountdownManager _countdownManager;
+        
+        [SerializeField] private TilemapGenerator _tilemapGenerator;
 
         // возможно, стоит заменить на словарь, чтобы не прогружать всё по-новому каждый раз
         public static GameObject GetGameObject(GameObjectType type) => Resources.Load<GameObject>("Prefabs/" + type);
@@ -21,7 +23,7 @@ namespace DeliveryRush
         public void BuildMap(List<Tuple<AreaType, List<GameObjectType>>> map)
         {
             CameraManager.LeftBound = _nextSpawn.x;
-            
+
             foreach (var areaContent in map)
             {
                 var areaType = areaContent.Item1;
@@ -36,16 +38,16 @@ namespace DeliveryRush
                     if (building != null)
                     {
                         building.GenerateObstacles();
-                    
+
                         foreach (var positionInfo in Building.Positions[building.buildingType])
                         {
                             if (building.freePositions[positionInfo.PositionNumber]) continue;
-                        
+
                             var obstacle = GetGameObject(positionInfo.Info.ObType);
                             Spawn(obstacle, _nextSpawn + positionInfo.RelativePosition);
                         }
                     }
-                    
+
                     AddSpace(g.GetWidth() + _spacing);
                 }
 
@@ -55,38 +57,25 @@ namespace DeliveryRush
                 // TODO: change the logic behind calculation of iterations 
                 var backIterations = areaContent.Item2.Count;
                 var backgroundObjects = MapGenerator.AreaBackground[areaType];
-                
+
                 if (backgroundObjects.Length == 0) continue;
-                
+
                 var rand = new Random();
-                
+
                 for (var i = 0; i < backIterations; i++)
                 {
                     var index = rand.Next(backgroundObjects.Length);
-                    var backgroundItem = GetGameObject(backgroundObjects[index]); 
+                    var backgroundItem = GetGameObject(backgroundObjects[index]);
                     Spawn(backgroundItem, nextBackgroundSpawn);
                     nextBackgroundSpawn += Vector3.right * backgroundItem.GetWidth();
                 }
             }
-            
+
             CameraManager.RightBound = _nextSpawn.x;
 
             // время на прохождение карты
             _countdownManager.SetTime(BuildingsCount);
-
-            var groundWidth = Ground.GetWidth();
-            var iterations = (int) (_nextSpawn.x / groundWidth) + 1;
-            // print(_mapWidth + " " + groundWidth);
-
-            for (var i = 0; i < iterations; i++)
-            {
-                Spawn(Ground, _groundNextSpawn
-                              + new Vector3(-0, -0.5f, 0)
-                              );
-                _groundNextSpawn += Vector3.right * groundWidth;
-            }
-
-            // Spawn(GetGameObject(GameObjectType.EndTrigger), _nextSpawn + new Vector3(-2.5f, 0, 0));
+            _tilemapGenerator.Generate((int) _nextSpawn.x + 1);
         }
 
         public void Clear()
@@ -96,6 +85,8 @@ namespace DeliveryRush
             
             while (transform.childCount > 0)
                 DestroyImmediate(transform.GetChild(0).gameObject);
+            
+            _tilemapGenerator.Clear();
         }
         
         private Transform Spawn(GameObject gameObject)
@@ -105,20 +96,5 @@ namespace DeliveryRush
             => Instantiate(gameObject, spawnPoint, Quaternion.identity, transform).transform;
 
         private void AddSpace(float length) => _nextSpawn += Vector3.right * length;
-
-        #region Ground stuff
-        private static GameObject _ground;
-        private static GameObject Ground
-        {
-            get
-            {
-                if (_ground == null)
-                    _ground = Resources.Load<GameObject>("Prefabs/Ground");
-                return _ground;
-            }
-        }
-        
-        #endregion
-        
     }
 }
