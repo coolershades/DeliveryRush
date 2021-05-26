@@ -1,21 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
+using JetBrains.Annotations;
 using UnityEngine;
 using Random = System.Random;
 
 namespace DeliveryRush
 {
-    public class MapGenerator
+    public static class MapGenerator
     {
         // Temporary values, I'll have to change them soon
-        
-        private const int MIN_MAP_LENGTH = 10;
-        private const int MAX_MAP_LENGTH = 15;
-        
         private const int MinAreaLength = 3;
         private const int MaxAreaLength = 6;
 
-        private static Random rand = new Random();
+        private static readonly Random rand = new Random();
 
         /*private static readonly Dictionary<Tuple<Area, Area>, double> TransitionsProbabilities = 
             new Dictionary<Tuple<Area, Area>, double>
@@ -67,8 +65,10 @@ namespace DeliveryRush
                 }},
                 {AreaType.Downtown, new [] 
                 {
-                    GameObjectType.Boutique1, GameObjectType.Boutique, 
-                    GameObjectType.DodoPizza, GameObjectType.AlmaMater
+                    // GameObjectType.Boutique1, 
+                    GameObjectType.Boutique, 
+                    GameObjectType.DodoPizza, GameObjectType.AlmaMater,
+                    GameObjectType.SkyScraper1
                 }},
                 {AreaType.Residential, new [] 
                 {
@@ -89,6 +89,23 @@ namespace DeliveryRush
                 {
                     GameObjectType.CrossRoad
                 }}
+            };
+
+        public static Dictionary<AreaType, GameObjectType[]> AreaBackground
+            = new Dictionary<AreaType, GameObjectType[]>
+            {
+                {AreaType.Restaurant, new GameObjectType[0]},
+                {AreaType.Downtown, new GameObjectType[0]},
+                {AreaType.Residential, new []
+                {
+                    GameObjectType.ResBack1, GameObjectType.ResBack2, GameObjectType.ResBack3
+                }},
+                {AreaType.Poor, new []
+                {
+                    GameObjectType.PoorBack1, GameObjectType.PoorBack2, GameObjectType.PoorBack3
+                }},
+                {AreaType.Yard, new GameObjectType[0]},
+                {AreaType.CrossRoad, new GameObjectType[0]}
             };
         
         public static AreaType[] GenerateAreaTypeMap()
@@ -111,9 +128,8 @@ namespace DeliveryRush
             return map.ToArray();
         }
 
-        public static List<GameObjectType> GenerateBuildingTypeArea(AreaType areaType)
+        private static List<GameObjectType> GenerateBuildingTypeArea(AreaType areaType)
         {
-            // var rand = new Random();
             var areaLength = rand.Next(MinAreaLength, MaxAreaLength);
 
             if (areaType == AreaType.Restaurant || areaType == AreaType.Yard || areaType == AreaType.CrossRoad)
@@ -130,14 +146,14 @@ namespace DeliveryRush
             
             return result;
         }
-
-        public static List<GameObjectType> GenerateTypeMap(AreaType[] map)
+        
+        public static List<Tuple<AreaType, List<GameObjectType>>> GenerateTypeMap(AreaType[] map)
         {
-            var result = new List<GameObjectType>();
+            var result = new List<Tuple<AreaType, List<GameObjectType>>>();
             for (var i = 0; i < map.Length; i++)
             {
                 var areaMap = GenerateBuildingTypeArea(map[i]);
-                result.AddRange(areaMap);
+                result.Add(Tuple.Create(map[i], areaMap));
             }
             
             return result;

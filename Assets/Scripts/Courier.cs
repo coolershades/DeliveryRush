@@ -1,4 +1,3 @@
-using System;
 using DeliveryRush;
 using UnityEngine;
 
@@ -32,7 +31,7 @@ public class Courier : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private LayerMask groundObjectsLayer;
     [SerializeField] private UIManager uiManager;
-    [SerializeField] private DeathMenuManager deathMenuManager;
+    [SerializeField] public DeathMenuManager deathMenuManager;
 
     private static readonly int EditorStateHash = Animator.StringToHash("State");
 

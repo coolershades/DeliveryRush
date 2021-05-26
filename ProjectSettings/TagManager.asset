@@ -5,9 +5,9 @@ TagManager:
   serializedVersion: 2
   tags:
   - PigeonFlock
-  - FrozenPuddle
   - Obstacle
   - Car
+  - End
   layers:
   - Default
   - TransparentFX
@@ -47,6 +47,9 @@ TagManager:
     locked: 0
   - name: Sky
     uniqueID: 3196464615
+    locked: 0
+  - name: BackgroundBuildings
+    uniqueID: 430439367
     locked: 0
   - name: Buildings
     uniqueID: 2193971049

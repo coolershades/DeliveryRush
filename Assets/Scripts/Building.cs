@@ -27,21 +27,44 @@ namespace DeliveryRush
                 {GameObjectType.McDonalds, new [] {
                     new PositionInfo(
                         new Vector3(8.5f,0,0),
-                        new PositionInfo.ObstacleInfo(GameObjectType.TrashCan, 0.9),
-                        0)
+                        new PositionInfo.ObstacleInfo(GameObjectType.TrashCan, 0.4),
+                        0),
+                    new PositionInfo(
+                        new Vector3(1f,0,0),
+                        new PositionInfo.ObstacleInfo(GameObjectType.Car, 0.7),
+                        1)
                 }},
                 
                 /* DOWNTOWN */
-                {GameObjectType.Boutique1, new PositionInfo[0]},
+                // {GameObjectType.Boutique1, new PositionInfo[0]},
                 {GameObjectType.Boutique, new PositionInfo[0]},
                 {GameObjectType.DodoPizza, new PositionInfo[0]},
-                {GameObjectType.AlmaMater, new PositionInfo[0]},
+                {GameObjectType.AlmaMater, new[] {
+                    new PositionInfo(
+                        new Vector3(7,Pigeons.FlightHeight,0), 
+                        new PositionInfo.ObstacleInfo(GameObjectType.Pigeon, 0.7),
+                        0),
+                    new PositionInfo(
+                        new Vector3(3f,0,0),
+                        new PositionInfo.ObstacleInfo(GameObjectType.TrashCan, 0.1),
+                        1)
+                }},
+                {GameObjectType.SkyScraper1, new[] {
+                    new PositionInfo(
+                        new Vector3(2f,0,0),
+                        new PositionInfo.ObstacleInfo(GameObjectType.TrashCan, 0.05),
+                        0),
+                    new PositionInfo(
+                        new Vector3(2f,0,0),
+                        new PositionInfo.ObstacleInfo(GameObjectType.Car, 0.6),
+                        1)
+                }},
                 
                 /* RESIDENTIAL */
                 {GameObjectType.Flat1, new[] {
                     new PositionInfo(
                         new Vector3(4,Pigeons.FlightHeight,0), 
-                        new PositionInfo.ObstacleInfo(GameObjectType.Pigeon, 0.3),
+                        new PositionInfo.ObstacleInfo(GameObjectType.Pigeon, 0.7),
                         0),
                     new PositionInfo(
                         new Vector3(1,0,0),
@@ -71,13 +94,16 @@ namespace DeliveryRush
                 {GameObjectType.Flat3, new[] {
                     new PositionInfo(
                         new Vector3(1,Pigeons.FlightHeight,0), 
-                        new PositionInfo.ObstacleInfo(GameObjectType.Pigeon, 0.05),
+                        new PositionInfo.ObstacleInfo(GameObjectType.Pigeon, 0.5),
                         0),
                     new PositionInfo(
                         new Vector3(1.5f,0,0),
                         new PositionInfo.ObstacleInfo(GameObjectType.TrashCan, 0.1),
-                        1)
-                        
+                        1),
+                    new PositionInfo(
+                        new Vector3(1.5f,0,0),
+                        new PositionInfo.ObstacleInfo(GameObjectType.Car, 0.3),
+                        2)
                 }},
                 {GameObjectType.Flat4, new[] {
                     new PositionInfo(
@@ -104,14 +130,14 @@ namespace DeliveryRush
                 {GameObjectType.ConvStore1, new[] {
                     new PositionInfo(
                         new Vector3(2, 0, 0), 
-                        new PositionInfo.ObstacleInfo(GameObjectType.TrashCan, 0.1),
+                        new PositionInfo.ObstacleInfo(GameObjectType.TrashCan, 0.3),
                         0),
                         
                 }},
                 {GameObjectType.ConvStore2, new[] {
                     new PositionInfo(
                         new Vector3(1, 0, 0), 
-                        new PositionInfo.ObstacleInfo(GameObjectType.TrashCan, 0.1),
+                        new PositionInfo.ObstacleInfo(GameObjectType.TrashCan, 0.2),
                         0),
                         
                 }},
@@ -127,15 +153,26 @@ namespace DeliveryRush
                 {GameObjectType.PoorFlat1, new[] {
                     new PositionInfo(
                         new Vector3(0,0,0),
-                        new PositionInfo.ObstacleInfo(GameObjectType.TrashCan, 1),
+                        new PositionInfo.ObstacleInfo(GameObjectType.TrashCan, 0.3),
                         0)
                 }},
                 
                 /* YARD */
-                {GameObjectType.Yard1, new PositionInfo[0]},
+                {GameObjectType.Yard1, new [] {
+                    new PositionInfo(
+                        new Vector3(2.5f,0,0),
+                        new PositionInfo.ObstacleInfo(GameObjectType.EndTrigger, 1),
+                        0)
+                }},
                 
                 /* CROSSROAD */
-                {GameObjectType.CrossRoad, new PositionInfo[0]},
+                {GameObjectType.CrossRoad, new []
+                {
+                    new PositionInfo(
+                        new Vector3(0.5f,0,0),
+                        new PositionInfo.ObstacleInfo(GameObjectType.Car, 0.8),
+                        0)
+                }},
             };
 
         private readonly Random _rand = new Random();
@@ -160,8 +197,8 @@ namespace DeliveryRush
         {
             // Position is relative to it's parent's building spawnPoint
             public Vector3 RelativePosition;
-            public ObstacleInfo Info;
-            public int PositionNumber; // порядковый номер в списке для некоторого типа здания. не должен повторяться в списке в пределе одного здания
+            public readonly ObstacleInfo Info;
+            public readonly int PositionNumber; // порядковый номер в списке для некоторого типа здания. не должен повторяться в списке в пределе одного здания
 
             public PositionInfo(Vector3 relativePosition, ObstacleInfo info, int positionNumber = -1)
             {
@@ -172,8 +209,8 @@ namespace DeliveryRush
 
             public class ObstacleInfo
             {
-                public GameObjectType ObType;
-                public double SpawnProbability;
+                public readonly GameObjectType ObType;
+                public readonly double SpawnProbability;
                 
                 public ObstacleInfo(GameObjectType obstacleType, double spawnProbability = 0)
                 {

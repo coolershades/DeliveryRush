@@ -6,6 +6,8 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Sprite[] _statusBarSprites;
     [SerializeField] private Image _statusBar;
     [SerializeField] private Courier _courier;
+    
+    [SerializeField] private CountdownManager _countdownManager;
 
     public void UpdateStatusBar()
     {
