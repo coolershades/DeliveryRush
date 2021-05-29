@@ -3,7 +3,6 @@ using UnityEngine;
 
 public class Pigeons : Obstacle
 {
-    // Start is called before the first frame update
     public static float FlightHeight = 1;
     
     private bool _hasStarted;
@@ -27,7 +26,7 @@ public class Pigeons : Obstacle
             _rigidbody2D.velocity = new Vector2(-flightSpeed, 0);
             _hasStarted = true;
         }
-        else if (_hasStarted) Destroy(this);
+        else if (_hasStarted) Destroy(this.gameObject);
     }
     
     private void OnTriggerEnter2D(Collider2D other)

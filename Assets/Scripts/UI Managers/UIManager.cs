@@ -6,12 +6,10 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Sprite[] _statusBarSprites;
     [SerializeField] private Image _statusBar;
     [SerializeField] private Courier _courier;
-    
-    // [SerializeField] private CountdownManager _countdownManager;
 
     public void UpdateStatusBar()
     {
-        var damage = 1 - _courier.ParcelDamageStatus;
+        var damage = _courier.ParcelPreservationStatus;
         if (damage == 0)
             _statusBar.sprite = _statusBarSprites[0];
         else if (damage <= .2f)

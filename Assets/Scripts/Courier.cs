@@ -5,18 +5,20 @@ using UnityEngine;
 public class Courier : MonoBehaviour
 {
     public CourierState State { get; private set; }
-    
-    private float _parcelDamageStatus;
-    public float ParcelDamageStatus
+    public bool IsOnTransport { get; private set; }
+    public GameObjectType CurrentTransportType { get; private set; }
+
+    private float _parcelPreservationStatus;
+    public float ParcelPreservationStatus
     {
-        get => _parcelDamageStatus;
+        get => _parcelPreservationStatus;
         private set
         {
-            if (value >= 0 && value < 1)
-                _parcelDamageStatus = value;
+            if (value > 0 && value <= 1)
+                _parcelPreservationStatus = value;
             else
             {
-                _parcelDamageStatus = 1;
+                _parcelPreservationStatus = 0;
                 deathMenuManager.TriggerDeath();
             }
         }
@@ -29,9 +31,8 @@ public class Courier : MonoBehaviour
     [SerializeField] private float speed;
     [SerializeField] private float jumpForce;
     [SerializeField] private float slidingMultiplier; // ужасное название, надо как-то переименовать
-    
+
     [SerializeField] private LayerMask groundLayer;
-    // [SerializeField] private LayerMask groundObjectsLayer;
     
     [SerializeField] private UIManager uiManager;
     [SerializeField] public DeathMenuManager deathMenuManager;
@@ -39,34 +40,25 @@ public class Courier : MonoBehaviour
 
     private void Start()
     {
+        State = CourierState.Idle;
+        CurrentTransportType = GameObjectType.Courier;
+        
         speed = 10;
         jumpForce = 10;
-        ParcelDamageStatus = 0;
+        ParcelPreservationStatus = 1;
         slidingMultiplier = 1.6f;
         
         _rigidBody = GetComponent<Rigidbody2D>();
         _collider = GetComponent<Collider2D>();
         _animator = GetComponent<Animator>();
     }
+    
+    // TODO https://www.youtube.com/watch?v=jfFOD9TRKeQ&list=PLpj8TZGNIBNy51EtRuyix-NYGmcfkNAuH&index=25&t=1s
 
     private void Update()
     {
-        ManageMovement();
-    }
-
-    private void ManageMovement()
-    {
         var hDirection = Input.GetAxis("Horizontal");
         var directionDx = hDirection.CompareTo(0);
-
-        /*if (hDirection != 0)
-        {
-            _rigidBody.velocity = State != CourierState.Sliding 
-                ? new Vector2(directionDx * speed, _rigidBody.velocity.y) 
-                : new Vector2(directionDx * speed * slidingMultiplier, _rigidBody.velocity.y);
-
-            transform.localScale = new Vector2(directionDx, 1);
-        }*/
         
         if (Math.Abs(hDirection) > 0.05)
         {
@@ -83,16 +75,31 @@ public class Courier : MonoBehaviour
             State = CourierState.Jumping;
         }
 
-        /*// скольжение по лужам
-        // TODO: сделать что-то с этим!! заменить 20f и выделение целого слоя под лужи 
-        // ОЧЕНЬ сомнительное решение, но пока так
-        if (_collider.IsTouchingLayers(groundObjectsLayer))
-            _rigidBody.velocity = new Vector2(10f * direction + _rigidBody.velocity.x, _rigidBody.velocity.y);*/
-
+        UpdateTransport();
         UpdateState();
     }
+
+
+    private float _timeToDriveLeft = Transport.DefaultRideTime;
     
+    private void UpdateTransport()
+    {
+        if (!IsOnTransport) return;
+
+        if (_timeToDriveLeft <= 0)
+        {
+            print("end of ride.");
+            Instantiate(MapBuilder.GetGameObject(CurrentTransportType), transform.position, Quaternion.identity, null);
+            SwitchToTransport(false);
+            _timeToDriveLeft = Transport.DefaultRideTime;
+        }
+        
+        print("time left: " + (int)_timeToDriveLeft);
+        _timeToDriveLeft -= Time.deltaTime;
+    }
+
     private static readonly int EditorStateHash = Animator.StringToHash("State");
+    private static readonly int OnTransport = Animator.StringToHash("IsOnTransport");
 
     private void UpdateState()
     {
@@ -118,7 +125,7 @@ public class Courier : MonoBehaviour
                 break;
             
             default:
-                State = Mathf.Abs(_rigidBody.velocity.x) > 0 && State != CourierState.Sliding
+                State = Mathf.Abs(_rigidBody.velocity.x) > 0.05 && State != CourierState.Sliding
                     ? CourierState.Running : CourierState.Idle;
                 
                 if (Input.GetKey("left shift"))
@@ -126,13 +133,33 @@ public class Courier : MonoBehaviour
                 break;
         }
         
-        // print("State: " + _state);
+        // print("State: " + State);
         _animator.SetInteger(EditorStateHash, (int) State);
     }
 
     public void DamageParcel(float damage)
     {
-        ParcelDamageStatus += damage;
+        ParcelPreservationStatus -= damage;
         uiManager.UpdateStatusBar();
     }
+
+    public void SwitchToTransport(bool isOnTransport, GameObjectType transportType = GameObjectType.Courier)
+    {
+        IsOnTransport = isOnTransport;
+        _animator.SetBool(OnTransport, isOnTransport);
+        _animator.SetInteger("CurrentTransportType", (int) transportType);
+        CurrentTransportType = transportType;
+        
+        Obstacle.ObstaclesAreCollidable = !isOnTransport;
+    }
+}
+
+public enum CourierState
+{
+    Idle = 0,
+    Running = 1,
+    Jumping = 2,
+    Falling = 3,
+    Sliding = 4,
+    // Damaged = 6
 }

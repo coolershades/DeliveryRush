@@ -52,6 +52,8 @@
         Car1,
         
         /* MISC */
-        EndTrigger
+        EndTrigger,
+        Scooter = 101,
+        Courier = 102
     }
 }

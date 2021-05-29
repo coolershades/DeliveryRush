@@ -7,6 +7,6 @@ public class EndTrigger : MonoBehaviour
         var courier = other.GetComponent<Courier>();
         if (courier == null) return;
         
-        courier.endMenuManager.Activate();
+        courier.endMenuManager.Activate(courier.ParcelPreservationStatus);
     }
 }

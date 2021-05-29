@@ -23,7 +23,7 @@ namespace DeliveryRush
 
         public void Restart()
         {
-            
+            throw new NotImplementedException();
         }
 
         public void ToMainMenu()
