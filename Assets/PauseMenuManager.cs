@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class PauseMenuManager : MonoBehaviour
@@ -36,6 +37,6 @@ public class PauseMenuManager : MonoBehaviour
 
     public void SaveAndQuit()
     {
-        Application.Quit();
+        throw new NotImplementedException();
     }
 }
