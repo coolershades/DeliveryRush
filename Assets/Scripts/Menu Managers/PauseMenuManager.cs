@@ -3,8 +3,8 @@ using UnityEngine;
 
 public class PauseMenuManager : MonoBehaviour
 {
-    public static bool _gameIsPaused;
     public GameObject _pauseMenuUI;
+    public static bool _gameIsPaused;
 
     private void Start()
     {
@@ -17,18 +17,11 @@ public class PauseMenuManager : MonoBehaviour
         {
             if (_gameIsPaused)
                 Resume();
-            else Pause();
+            else Activate();
         }
     }
 
-    public void Resume()
-    {
-        _pauseMenuUI.SetActive(false);
-        Time.timeScale = 1;
-        _gameIsPaused = false;
-    }
-
-    public void Pause()
+    public void Activate()
     {
         _pauseMenuUI.SetActive(true);
         Time.timeScale = 0;
@@ -38,5 +31,12 @@ public class PauseMenuManager : MonoBehaviour
     public void SaveAndQuit()
     {
         throw new NotImplementedException();
+    }
+    
+    public void Resume()
+    {
+        _pauseMenuUI.SetActive(false);
+        Time.timeScale = 1;
+        _gameIsPaused = false;
     }
 }

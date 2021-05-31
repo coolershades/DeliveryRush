@@ -7,8 +7,11 @@ using UnityEngine.UI;
 public class EndMenuManager : MonoBehaviour
 {
     [SerializeField] private GameObject endMenuUI;
-    [SerializeField] private Text coinsDisplay;
+    
+    [SerializeField] private Courier courier;
     [SerializeField] private MapBuilder mapBuilder;
+
+    [SerializeField] private Text coinsDisplay;
 
     private const string MoneyBank = "MoneyBank";
 
@@ -33,6 +36,15 @@ public class EndMenuManager : MonoBehaviour
     }
 
     public void Restart()
+    {
+        courier.Reset();
+        mapBuilder.Reset();
+        Time.timeScale = 1;
+        
+        Start();
+    }
+    
+    public void ToMainMenu()
     {
         throw new NotImplementedException();
     }

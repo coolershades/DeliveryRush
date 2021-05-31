@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Random = System.Random;
 
 namespace DeliveryRush
@@ -8,27 +9,37 @@ namespace DeliveryRush
     public class MapBuilder : MonoBehaviour
     {
         private Vector3 _nextSpawn = Vector3.zero;
-        private Vector3 _groundNextSpawn = Vector3.zero;
         
         [SerializeField] private float _spacing = 0.35f;
         
-        private int BuildingsCount;
-        [SerializeField] private CountdownManager _countdownManager;
+        private int _buildingsCount;
+        public float currentMapLength;
         
-        [SerializeField] private TilemapGenerator _tilemapGenerator;
+        [SerializeField] private CountdownManager countdownManager;
+        [SerializeField] private TilemapGenerator tilemapGenerator;
+        [SerializeField] private CameraManager cameraManager;
+
+        public void Reset()
+        {
+            Clear();
+            var map = MapGenerator.GenerateTypeMap(MapGenerator.GenerateAreaTypeMap());
+            BuildMap(map);
+        }
 
         // возможно, стоит заменить на словарь, чтобы не прогружать всё по-новому каждый раз
         public static GameObject GetGameObject(GameObjectType type) => Resources.Load<GameObject>("Prefabs/" + type);
 
         public void BuildMap(List<Tuple<AreaType, List<GameObjectType>>> map)
         {
-            CameraManager.LeftBound = _nextSpawn.x;
+            currentMapLength = 0;
 
+            // строим район
             foreach (var areaContent in map)
             {
                 var areaType = areaContent.Item1;
                 var nextBackgroundSpawn = _nextSpawn;
 
+                // строим здания
                 foreach (var gameObject in areaContent.Item2)
                 {
                     var g = GetGameObject(gameObject);
@@ -48,16 +59,18 @@ namespace DeliveryRush
                         }
                     }
 
-                    AddSpace(g.GetWidth() + _spacing);
+                    currentMapLength += g.GetWidth() + _spacing;
+                    _nextSpawn += Vector3.right * (g.GetWidth() + _spacing);
                 }
 
-                BuildingsCount += areaContent.Item2.Count;
+                _buildingsCount += areaContent.Item2.Count;
 
-                // Area background spawn
+                // ставим фон для района
                 // TODO: change the logic behind calculation of iterations 
                 var backIterations = areaContent.Item2.Count;
                 var backgroundObjects = MapGenerator.AreaBackground[areaType];
 
+                // TODO это ЧТО??
                 if (backgroundObjects.Length == 0) continue;
 
                 var rand = new Random();
@@ -70,31 +83,28 @@ namespace DeliveryRush
                     nextBackgroundSpawn += Vector3.right * backgroundItem.GetWidth();
                 }
             }
-
-            CameraManager.RightBound = _nextSpawn.x;
-
+            
             // время на прохождение карты
-            _countdownManager.SetTime(BuildingsCount);
-            _tilemapGenerator.Generate((int) _nextSpawn.x + 1);
+            countdownManager.SetTime(_buildingsCount);
+            tilemapGenerator.Generate((int) _nextSpawn.x + 1);
+            cameraManager.SetBounds(0, _nextSpawn.x);
         }
 
         public void Clear()
         {
             _nextSpawn = Vector3.zero;
-            _groundNextSpawn = Vector3.zero;
+            _buildingsCount = 0;
             
             while (transform.childCount > 0)
                 DestroyImmediate(transform.GetChild(0).gameObject);
             
-            _tilemapGenerator.Clear();
+            tilemapGenerator.Clear();
         }
-        
+
         private Transform Spawn(GameObject gameObject)
             => Spawn(gameObject, _nextSpawn);
 
         private Transform Spawn(GameObject gameObject, Vector3 spawnPoint) 
             => Instantiate(gameObject, spawnPoint, Quaternion.identity, transform).transform;
-
-        private void AddSpace(float length) => _nextSpawn += Vector3.right * length;
     }
 }

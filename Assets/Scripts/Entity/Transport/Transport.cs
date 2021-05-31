@@ -1,4 +1,3 @@
-using System;
 using DeliveryRush;
 using UnityEngine;
 
@@ -12,10 +11,9 @@ public class Transport : MonoBehaviour
         var courier = other.gameObject.GetComponent<Courier>();
         if (courier == null) return;
 
-        if (Input.GetKey(KeyCode.E))
+        if (Input.GetKey(KeyCode.E) && courier.State == CourierState.Idle)
         {
             courier.SwitchToTransport(true, GameObjectType.Scooter);
-            print("ride started!");
             Destroy(this.gameObject);
         }
     }

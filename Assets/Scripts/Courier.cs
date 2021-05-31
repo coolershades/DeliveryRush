@@ -19,7 +19,7 @@ public class Courier : MonoBehaviour
             else
             {
                 _parcelPreservationStatus = 0;
-                deathMenuManager.TriggerDeath();
+                deathMenuManager.Activate();
             }
         }
     }
@@ -32,74 +32,104 @@ public class Courier : MonoBehaviour
     [SerializeField] private float jumpForce;
     [SerializeField] private float slidingMultiplier; // ужасное название, надо как-то переименовать
 
+    private float _transportSpeed;
+    private float _timeToDriveLeft;
+    
     [SerializeField] private LayerMask groundLayer;
     
-    [SerializeField] private UIManager uiManager;
+    [SerializeField] public UIManager uiManager;
     [SerializeField] public DeathMenuManager deathMenuManager;
     [SerializeField] public EndMenuManager endMenuManager;
 
+    private static readonly Vector3 DefaultSpawnPosition = new Vector3(7.3f, 1.5f, 0);
+
     private void Start()
     {
-        State = CourierState.Idle;
-        CurrentTransportType = GameObjectType.Courier;
+        _rigidBody = GetComponent<Rigidbody2D>();
+        _collider = GetComponent<Collider2D>();
+        _animator = GetComponent<Animator>();
         
+        State = CourierState.Idle;
+        SwitchToTransport(false);
+        
+        transform.position = DefaultSpawnPosition;
+        transform.localScale = new Vector2(1, 1);
+        _rigidBody.velocity = Vector2.zero; // TODO 
+
+        // print(_rigidBody.velocity);
+
         speed = 10;
         jumpForce = 10;
         ParcelPreservationStatus = 1;
         slidingMultiplier = 1.6f;
         
-        _rigidBody = GetComponent<Rigidbody2D>();
-        _collider = GetComponent<Collider2D>();
-        _animator = GetComponent<Animator>();
+        _transportSpeed = 12;
+        _timeToDriveLeft = Transport.DefaultRideTime;
+        
+        uiManager.UpdateStatusBar();
     }
+
+    public void Reset() => Start();
     
     // TODO https://www.youtube.com/watch?v=jfFOD9TRKeQ&list=PLpj8TZGNIBNy51EtRuyix-NYGmcfkNAuH&index=25&t=1s
 
     private void Update()
     {
-        var hDirection = Input.GetAxis("Horizontal");
-        var directionDx = hDirection.CompareTo(0);
+        if (!IsOnTransport)
+        {
+            var hDirection = Input.GetAxis("Horizontal");
+            var directionDx = hDirection.CompareTo(0);
         
-        if (Math.Abs(hDirection) > 0.05)
-        {
-            _rigidBody.velocity = State != CourierState.Sliding 
-                ? new Vector2(directionDx * speed, _rigidBody.velocity.y) 
-                : new Vector2(directionDx * speed * slidingMultiplier, _rigidBody.velocity.y);
-            transform.localScale = new Vector2(directionDx, 1);
-        }
-        else _rigidBody.velocity = new Vector2(0, _rigidBody.velocity.y); // для того, чтобы не было скольжения
+            if (Math.Abs(hDirection) > 0.05)
+            {
+                _rigidBody.velocity = State != CourierState.Sliding 
+                    ? new Vector2(directionDx * speed, _rigidBody.velocity.y) 
+                    : new Vector2(directionDx * speed * slidingMultiplier, _rigidBody.velocity.y);
+                transform.localScale = new Vector2(directionDx, 1);
+            }
+            else _rigidBody.velocity = new Vector2(0, _rigidBody.velocity.y); // для того, чтобы не было скольжения
 
-        if (Input.GetButtonDown("Jump") && _collider.IsTouchingLayers(groundLayer))
+            if (Input.GetButtonDown("Jump") && _collider.IsTouchingLayers(groundLayer))
+            {
+                _rigidBody.velocity = new Vector2(_rigidBody.velocity.x, jumpForce);
+                State = CourierState.Jumping;
+            }
+        }
+        else
         {
-            _rigidBody.velocity = new Vector2(_rigidBody.velocity.x, jumpForce);
-            State = CourierState.Jumping;
+            var hDirection = Input.GetAxis("Horizontal");
+            var directionDx = hDirection.CompareTo(0);
+
+            if (hDirection != 0)
+            {
+                _rigidBody.velocity 
+                    = new Vector2(directionDx * _transportSpeed * slidingMultiplier, _rigidBody.velocity.y);
+                transform.localScale = new Vector2(directionDx, 1);
+            }
         }
 
         UpdateTransport();
         UpdateState();
     }
 
-
-    private float _timeToDriveLeft = Transport.DefaultRideTime;
-    
     private void UpdateTransport()
     {
         if (!IsOnTransport) return;
 
         if (_timeToDriveLeft <= 0)
         {
-            print("end of ride.");
-            Instantiate(MapBuilder.GetGameObject(CurrentTransportType), transform.position, Quaternion.identity, null);
+            Instantiate(MapBuilder.GetGameObject(CurrentTransportType),
+                transform.position, Quaternion.identity, null);
             SwitchToTransport(false);
             _timeToDriveLeft = Transport.DefaultRideTime;
         }
         
-        print("time left: " + (int)_timeToDriveLeft);
         _timeToDriveLeft -= Time.deltaTime;
     }
 
     private static readonly int EditorStateHash = Animator.StringToHash("State");
     private static readonly int OnTransport = Animator.StringToHash("IsOnTransport");
+    private static readonly int TransportType = Animator.StringToHash("CurrentTransportType");
 
     private void UpdateState()
     {
@@ -128,12 +158,12 @@ public class Courier : MonoBehaviour
                 State = Mathf.Abs(_rigidBody.velocity.x) > 0.05 && State != CourierState.Sliding
                     ? CourierState.Running : CourierState.Idle;
                 
-                if (Input.GetKey("left shift"))
+                if (Input.GetKey("left shift") && State != CourierState.Idle)
                     State = CourierState.Sliding;
                 break;
         }
         
-        // print("State: " + State);
+        // print("State: " + State + "; IsOnTransport: " + IsOnTransport);
         _animator.SetInteger(EditorStateHash, (int) State);
     }
 
@@ -147,8 +177,10 @@ public class Courier : MonoBehaviour
     {
         IsOnTransport = isOnTransport;
         _animator.SetBool(OnTransport, isOnTransport);
-        _animator.SetInteger("CurrentTransportType", (int) transportType);
+        _animator.SetInteger(TransportType, (int) transportType);
         CurrentTransportType = transportType;
+
+        if (IsOnTransport && State != CourierState.Idle) State = CourierState.Running;
         
         Obstacle.ObstaclesAreCollidable = !isOnTransport;
     }

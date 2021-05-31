@@ -1,35 +1,37 @@
-using System;
-using DeliveryRush;
 using UnityEngine;
 
 public class CameraManager : MonoBehaviour
 {
     [SerializeField] private Transform player;
-    [SerializeField] private Camera _camera;
     private Vector3 _shift = Vector3.zero;
 
-    public static float LeftBound;
-    public static float RightBound;
+    [SerializeField] private float _leftBound;
+    [SerializeField] private float _rightBound;
 
-    private static float CenterToScreenBound;
+    // TODO получено эпирическим способом, должно вычисляться динамически
+    // transform.position находится в центре экрана, 
+    private const float CameraCenterToScreenBound = 9;
+
+    public void SetBounds(float leftBound, float rightBound)
+    {
+        _leftBound = leftBound + CameraCenterToScreenBound;
+        _rightBound = rightBound - CameraCenterToScreenBound;
+    }
 
     private void Start()
     {
-        _shift = new Vector3(5, 1, -10);
-        
-        /*var tmpPos = _camera.ScreenToWorldPoint(transform.position); // левый нижный угол камеры
-        CenterToScreenBound = Math.Abs(tmpPos.x - transform.position.x);
-        print(CenterToScreenBound);*/
+        _shift = new Vector3(5, 1.5f, -10);
     }
 
     private void Update()
     {
         transform.position = player.position + _shift;
 
-        /*var tmpPos = _camera.ScreenToWorldPoint(transform.position); // левый нижный угол камеры
-        CenterToScreenBound = Math.Abs(tmpPos.x - transform.position.x);
-        print("CenterToScreenBound " + CenterToScreenBound);
-        print("tmppos " + tmpPos);
-        // if ()*/
+        transform.position = new Vector3
+        (
+            Mathf.Clamp(transform.position.x, _leftBound, _rightBound),
+            transform.position.y,
+            transform.position.z
+        );
     }
 }

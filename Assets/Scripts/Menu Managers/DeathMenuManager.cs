@@ -1,5 +1,7 @@
 ﻿using System;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace DeliveryRush
@@ -7,15 +9,16 @@ namespace DeliveryRush
     public class DeathMenuManager : MonoBehaviour
     {
         [SerializeField] private GameObject _deathMenuUI;
-        [SerializeField] private Text _score;
+        
+        [SerializeField] private Courier courier;
+        [SerializeField] private MapBuilder mapBuilder;
 
         private void Start()
         {
             _deathMenuUI.SetActive(false);
-            Time.timeScale = 1;
         }
 
-        public void TriggerDeath()
+        public void Activate()
         {
             _deathMenuUI.SetActive(true);
             Time.timeScale = 0;
@@ -23,7 +26,11 @@ namespace DeliveryRush
 
         public void Restart()
         {
-            throw new NotImplementedException();
+            courier.Reset();
+            mapBuilder.Reset();
+            Time.timeScale = 1;
+            
+            Start();
         }
 
         public void ToMainMenu()
@@ -33,7 +40,8 @@ namespace DeliveryRush
 
         public void SaveAndQuit()
         {
-            Application.Quit();
+            // Application.Quit();
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex - 1);
         }
     }
 }

@@ -47,17 +47,25 @@ namespace DeliveryRush
                     new PositionInfo(
                         new Vector3(3f,0,0),
                         new PositionInfo.ObstacleInfo(GameObjectType.TrashCan, 0.1),
-                        1)
+                        1),
+                    new PositionInfo(
+                        new Vector3(7f,0,0),
+                        new PositionInfo.ObstacleInfo(GameObjectType.Scooter, 0.8),
+                        2)
                 }},
                 {GameObjectType.SkyScraper1, new[] {
                     new PositionInfo(
                         new Vector3(2f,0,0),
-                        new PositionInfo.ObstacleInfo(GameObjectType.TrashCan, 0.05),
+                        new PositionInfo.ObstacleInfo(GameObjectType.TrashCan, 0.08),
                         0),
                     new PositionInfo(
-                        new Vector3(2f,0,0),
-                        new PositionInfo.ObstacleInfo(GameObjectType.Car, 0.6),
-                        1)
+                        new Vector3(0,0,0),
+                        new PositionInfo.ObstacleInfo(GameObjectType.Car, 0.2),
+                        1),
+                    new PositionInfo(
+                        new Vector3(4f,0,0),
+                        new PositionInfo.ObstacleInfo(GameObjectType.Scooter, 0.6),
+                        2)
                 }},
                 
                 /* RESIDENTIAL */
@@ -88,7 +96,11 @@ namespace DeliveryRush
                         new PositionInfo(
                             new Vector3(1.5f,0,0),
                             new PositionInfo.ObstacleInfo(GameObjectType.TrashCan, 0.1),
-                            1)
+                            1),
+                        new PositionInfo(
+                            new Vector3(3f,0,0),
+                            new PositionInfo.ObstacleInfo(GameObjectType.Scooter, 0.3),
+                            2)
                         
                 }},
                 {GameObjectType.Flat3, new[] {
@@ -113,7 +125,11 @@ namespace DeliveryRush
                     new PositionInfo(
                         new Vector3(1.5f,0,0),
                         new PositionInfo.ObstacleInfo(GameObjectType.TrashCan, 0.05),
-                        1)
+                        1),
+                    new PositionInfo(
+                        new Vector3(3f,0,0),
+                        new PositionInfo.ObstacleInfo(GameObjectType.Scooter, 0.5),
+                        2)
                         
                 }},
                 {GameObjectType.Flat5, new[] {
@@ -152,8 +168,8 @@ namespace DeliveryRush
                 /* POOR */
                 {GameObjectType.PoorFlat1, new[] {
                     new PositionInfo(
-                        new Vector3(0,0,0),
-                        new PositionInfo.ObstacleInfo(GameObjectType.TrashCan, 0.3),
+                        new Vector3(2.5f,0,0),
+                        new PositionInfo.ObstacleInfo(GameObjectType.TrashCan, 0.4),
                         0)
                 }},
                 
