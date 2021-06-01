@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using Image = UnityEngine.UI.Image;
 
 public class UIManager : MonoBehaviour
@@ -6,6 +7,12 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Sprite[] _statusBarSprites;
     [SerializeField] private Image _statusBar;
     [SerializeField] private Courier _courier;
+    [SerializeField] private Text moneyText;
+
+    public void UpdateMoney(int newMoneyValue)
+    {
+        moneyText.text = newMoneyValue.ToString() + " r.";
+    }
 
     public void UpdateStatusBar()
     {

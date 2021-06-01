@@ -1,5 +1,5 @@
-using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PauseMenuManager : MonoBehaviour
 {
@@ -30,7 +30,7 @@ public class PauseMenuManager : MonoBehaviour
 
     public void SaveAndQuit()
     {
-        throw new NotImplementedException();
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex - 1);
     }
     
     public void Resume()

@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using DeliveryRush;
 using UnityEngine;
 
@@ -30,21 +31,35 @@ public class Courier : MonoBehaviour
 
     [SerializeField] private float speed;
     [SerializeField] private float jumpForce;
+    // [SerializeField] private float defaultSlidingTime;
     [SerializeField] private float slidingMultiplier; // ужасное название, надо как-то переименовать
 
     private float _transportSpeed;
     private float _timeToDriveLeft;
+    // private float _timeToSlideLeft;
     
     [SerializeField] private LayerMask groundLayer;
     
     [SerializeField] public UIManager uiManager;
-    [SerializeField] public DeathMenuManager deathMenuManager;
+    [SerializeField] public MenuManager deathMenuManager;
     [SerializeField] public EndMenuManager endMenuManager;
 
     private static readonly Vector3 DefaultSpawnPosition = new Vector3(7.3f, 1.5f, 0);
+    
+    public int Money
+    {
+        get => PlayerPrefs.GetInt(EndMenuManager.MoneyBank);
+        set
+        {
+            PlayerPrefs.SetInt(EndMenuManager.MoneyBank, value);
+            uiManager.UpdateMoney(Money);
+        }
+    }
 
     private void Start()
     {
+        uiManager.UpdateMoney(Money);
+        
         _rigidBody = GetComponent<Rigidbody2D>();
         _collider = GetComponent<Collider2D>();
         _animator = GetComponent<Animator>();
@@ -60,11 +75,13 @@ public class Courier : MonoBehaviour
 
         speed = 10;
         jumpForce = 10;
+        // defaultSlidingTime = 1f;
         ParcelPreservationStatus = 1;
         slidingMultiplier = 1.6f;
         
         _transportSpeed = 12;
         _timeToDriveLeft = Transport.DefaultRideTime;
+        // _timeToSlideLeft = defaultSlidingTime;
         
         uiManager.UpdateStatusBar();
     }
@@ -133,11 +150,27 @@ public class Courier : MonoBehaviour
 
     private void UpdateState()
     {
+        // print(_timeToSlideLeft);
+        
         switch (State)
         {
             case CourierState.Sliding:
-                if (!Input.GetKey("left shift"))
+                
+                /*if (_timeToSlideLeft <= 0)
+                {
                     State = CourierState.Running;
+                    _timeToSlideLeft = defaultSlidingTime;
+                }
+                else
+                {
+                    _timeToSlideLeft -= Time.deltaTime;
+                }*/
+                
+                if (!Input.GetKey("left shift"))
+                {
+                    State = CourierState.Running;
+                    // _timeToSlideLeft = defaultSlidingTime;
+                }
                 break;
             
             case CourierState.Jumping:
@@ -158,7 +191,9 @@ public class Courier : MonoBehaviour
                 State = Mathf.Abs(_rigidBody.velocity.x) > 0.05 && State != CourierState.Sliding
                     ? CourierState.Running : CourierState.Idle;
                 
-                if (Input.GetKey("left shift") && State != CourierState.Idle)
+                if (Input.GetKey("left shift") && State != CourierState.Idle
+                // && _timeToSlideLeft > 0
+                )
                     State = CourierState.Sliding;
                 break;
         }

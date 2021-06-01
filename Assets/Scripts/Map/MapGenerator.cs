@@ -83,7 +83,8 @@ namespace DeliveryRush
                 }},
                 {AreaType.Yard, new []
                 {
-                    GameObjectType.Yard1
+                    GameObjectType.Yard1,
+                    GameObjectType.Yard2
                 }},
                 {AreaType.CrossRoad, new []
                 {

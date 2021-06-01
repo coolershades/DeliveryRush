@@ -38,6 +38,7 @@
         
         /* YARD */
         Yard1,
+        Yard2,
         
         /* CROSSROAD */
         CrossRoad,

@@ -176,7 +176,13 @@ namespace DeliveryRush
                 /* YARD */
                 {GameObjectType.Yard1, new [] {
                     new PositionInfo(
-                        new Vector3(2.5f,0,0),
+                        new Vector3(3.5f,0,0),
+                        new PositionInfo.ObstacleInfo(GameObjectType.EndTrigger, 1),
+                        0)
+                }},
+                {GameObjectType.Yard2, new [] {
+                    new PositionInfo(
+                        new Vector3(3.5f,0,0),
                         new PositionInfo.ObstacleInfo(GameObjectType.EndTrigger, 1),
                         0)
                 }},

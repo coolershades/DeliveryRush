@@ -8,7 +8,7 @@ public class CountdownManager : MonoBehaviour
     public float SecondsToEnd;
     public Text CountdownDisplay;
 
-    [SerializeField] private DeathMenuManager _deathMenuManager;
+    [SerializeField] private MenuManager _deathMenuManager;
     
     private const float SecondsPerBuilding = 1f;
 

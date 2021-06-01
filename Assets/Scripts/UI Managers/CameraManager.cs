@@ -20,7 +20,7 @@ public class CameraManager : MonoBehaviour
 
     private void Start()
     {
-        _shift = new Vector3(5, 1.5f, -10);
+        _shift = new Vector3(5, 2.5f, -10);
     }
 
     private void Update()

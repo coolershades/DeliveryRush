@@ -32,6 +32,7 @@ namespace DeliveryRush
         public void BuildMap(List<Tuple<AreaType, List<GameObjectType>>> map)
         {
             currentMapLength = 0;
+            Spawn(Resources.Load<GameObject>("Prefabs/Bound"), _nextSpawn + new Vector3(-0.5f, 0, 0));
 
             // строим район
             foreach (var areaContent in map)
